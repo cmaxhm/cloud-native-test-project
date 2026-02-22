@@ -3,6 +3,7 @@ spring:
     name: configuration-server
   profiles:
     active: native
+
 server:
   port: 8088
 
