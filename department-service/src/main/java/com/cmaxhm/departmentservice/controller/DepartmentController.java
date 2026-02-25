@@ -1,5 +1,6 @@
 package com.cmaxhm.departmentservice.controller;
 
+import com.cmaxhm.departmentservice.client.EmployeeClient;
 import com.cmaxhm.departmentservice.model.Department;
 import com.cmaxhm.departmentservice.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/departments")
@@ -15,10 +17,15 @@ import java.util.List;
 @Slf4j
 class DepartmentController {
   private final DepartmentRepository departmentRepository;
+  private final EmployeeClient employeeClient;
 
   @GetMapping
   public ResponseEntity<List<Department>> getAll() {
-    return ResponseEntity.ok(this.departmentRepository.findAll());
+    List<Department> departments = this.departmentRepository.findAll();
+
+    departments.forEach(department -> department.setEmployees(this.employeeClient.findAllByDepartmentId(department.getId())));
+
+    return ResponseEntity.ok(departments);
   }
 
   @PostMapping
@@ -30,6 +37,16 @@ class DepartmentController {
 
   @GetMapping("/{departmentId}")
   public ResponseEntity<Department> getById(@PathVariable Long departmentId) {
-    return ResponseEntity.ok(this.departmentRepository.findById(departmentId).orElse(null));
+    Optional<Department> optionalDepartment = this.departmentRepository.findById(departmentId);
+
+    if (optionalDepartment.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    Department department = optionalDepartment.get();
+
+    department.setEmployees(this.employeeClient.findAllByDepartmentId(departmentId));
+
+    return ResponseEntity.ok(department);
   }
 }
