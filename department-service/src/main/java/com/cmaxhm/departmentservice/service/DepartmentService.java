@@ -1,6 +1,5 @@
 package com.cmaxhm.departmentservice.service;
 
-import com.cmaxhm.departmentservice.client.EmployeeClient;
 import com.cmaxhm.departmentservice.model.Department;
 import com.cmaxhm.departmentservice.repository.DepartmentRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -16,13 +15,13 @@ import java.util.Optional;
 @Slf4j
 public class DepartmentService {
   private final DepartmentRepository departmentRepository;
-  private final EmployeeClient employeeClient;
+  private final EmployeeService employeeService;
 
   @CircuitBreaker(name = "department-service", fallbackMethod = "fallbackFindAll")
   public List<Department> findAll() {
     List<Department> departments = this.departmentRepository.findAll();
 
-    departments.forEach(department -> department.setEmployees(this.employeeClient.findAllByDepartmentId(department.getId())));
+    departments.forEach(department -> department.setEmployees(this.employeeService.findAllByDepartmentId(department.getId())));
 
     return departments;
   }
@@ -35,7 +34,7 @@ public class DepartmentService {
 
     Department department = optionalDepartment.get();
 
-    department.setEmployees(this.employeeClient.findAllByDepartmentId(departmentId));
+    department.setEmployees(this.employeeService.findAllByDepartmentId(departmentId));
 
     return Optional.of(department);
   }
