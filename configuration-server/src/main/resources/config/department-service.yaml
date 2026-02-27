@@ -62,3 +62,6 @@ resilience4j:
       department-service:
         maxWaitDuration: 5s
         maxConcurrentCalls: 5
+
+default:
+  message: Hello message...
