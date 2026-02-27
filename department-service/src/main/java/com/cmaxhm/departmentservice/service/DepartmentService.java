@@ -2,6 +2,7 @@ package com.cmaxhm.departmentservice.service;
 
 import com.cmaxhm.departmentservice.model.Department;
 import com.cmaxhm.departmentservice.repository.DepartmentRepository;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ public class DepartmentService {
   private final EmployeeService employeeService;
 
   @CircuitBreaker(name = "department-service", fallbackMethod = "fallbackFindAll")
+  @Bulkhead(name = "department-service", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "fallbackFindAllBulkhead")
   public List<Department> findAll() {
     List<Department> departments = this.departmentRepository.findAll();
 
@@ -53,5 +55,11 @@ public class DepartmentService {
     log.error("Error occurred while fetching department with id: {}", departmentId, throwable.getMessage());
 
     return this.departmentRepository.findById(departmentId);
+  }
+
+  private List<Department> fallbackFindAllBulkhead(Throwable throwable) {
+    log.error("Department service is overloaded {}", throwable.getMessage());
+
+    return this.departmentRepository.findAll();
   }
 }
