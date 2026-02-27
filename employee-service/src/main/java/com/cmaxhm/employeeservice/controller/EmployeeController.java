@@ -23,7 +23,9 @@ public class EmployeeController {
   }
 
   @GetMapping("/departments/{departmentId}")
-  public ResponseEntity<List<Employee>> findAllByDepartmentId(@PathVariable Long departmentId) {
+  public ResponseEntity<List<Employee>> findAllByDepartmentId(@PathVariable Long departmentId) throws InterruptedException {
+    Thread.sleep(5000L);
+
     return ResponseEntity.ok(this.employeeRepository.findByDepartmentId(departmentId));
   }
 
